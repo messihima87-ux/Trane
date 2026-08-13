@@ -1,0 +1,49 @@
+name: Build Trane IR Tester APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare Android project
+        run: |
+          mkdir -p app/src/main/java/com/example/traneirtester
+          mkdir -p app/src/main/res/values
+
+          cp AndroidManifest.xml app/src/main/AndroidManifest.xml
+          cp MainActivity.kt app/src/main/java/com/example/traneirtester/MainActivity.kt
+          cp styles.xml app/src/main/res/values/styles.xml
+          cp build.gradle.kts app/build.gradle.kts
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK
+        run: |
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build APK
+        run: gradle assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TraneIRTester-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
