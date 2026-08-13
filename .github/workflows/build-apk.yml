@@ -92,10 +92,8 @@ jobs:
           gradle :app:assembleDebug --no-daemon
           echo "=== APK FILES ==="
           find . -type f -name "*.apk" -print
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: TraneIRTester-APK
-          path: "**/*.apk"
-          if-no-files-found: error
+          path: app/build/outputs/apk/debug/app-debug.apk
