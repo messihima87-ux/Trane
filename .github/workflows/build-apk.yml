@@ -3,7 +3,7 @@ name: Build Trane IR Tester APK
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -18,16 +18,56 @@ jobs:
           mkdir -p app/src/main/java/com/example/traneirtester
           mkdir -p app/src/main/res/values
 
+          # Move the flattened project files into the correct Android structure
           cp AndroidManifest.xml app/src/main/AndroidManifest.xml
           cp MainActivity.kt app/src/main/java/com/example/traneirtester/MainActivity.kt
           cp styles.xml app/src/main/res/values/styles.xml
+
+          # The existing build.gradle.kts is the APP build file
           cp build.gradle.kts app/build.gradle.kts
+
+          # Create the correct ROOT Gradle build file
+          cat > build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application") version "8.6.1" apply false
+              id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+          }
+          EOF
+
+          # Create correct settings file
+          cat > settings.gradle.kts <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+
+          rootProject.name = "TraneIRTester"
+          include(":app")
+          EOF
+
+          # Create Gradle properties
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          kotlin.code.style=official
+          EOF
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
