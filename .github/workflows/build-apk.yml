@@ -87,3 +87,8 @@ jobs:
           dependencies {
               implementation("androidx.core:core-ktx:1.15.0")
               implementation("androidx.appcompat:
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TraneIRTester-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
